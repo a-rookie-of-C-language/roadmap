@@ -1,0 +1,13 @@
+package com.roadmap.repository;
+
+import com.roadmap.entity.Device;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DeviceRepository extends JpaRepository<Device, Long> {
+
+    List<Device> findByUserId(Long userId);
+
+    Optional<Device> findByDeviceId(String deviceId);
+}
