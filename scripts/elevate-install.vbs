@@ -1,2 +1,5 @@
 Set UAC = CreateObject("Shell.Application")
-UAC.ShellExecute "cmd.exe", "/c ""D:\code\IdeaFiles\RoadMap\scripts\install-postgis-admin.bat""", "", "runas", 1
+Set fso = CreateObject("Scripting.FileSystemObject")
+scriptFolder = fso.GetParentFolderName(WScript.ScriptFullName)
+batPath = scriptFolder & "\" & "install-postgis-admin.bat"
+UAC.ShellExecute "cmd.exe", "/c """ & batPath & """", "", "runas", 1

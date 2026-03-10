@@ -1,9 +1,10 @@
 @echo off
-REM PostGIS Installation - Copy DLLs to PostgreSQL
-REM This script copies PostGIS files from the extracted bundle to PostgreSQL
+REM PostGIS Installation - Copy DLLs to PostgreSQL (paths relative to this script)
+REM Usage: set TARGET=C:\path\to\postgresql && install-postgis-admin.bat
 
-set SOURCE=D:\code\IdeaFiles\RoadMap\postgis-tmp\postgis-bundle-pg18-3.6.1x64
-set TARGET=D:\pgsql
+set SCRIPT_DIR=%~dp0
+set SOURCE=%SCRIPT_DIR%..\postgis-tmp\postgis-bundle-pg18-3.6.1x64
+if not defined TARGET set TARGET=D:\pgsql
 
 echo Copying PostGIS DLLs to PostgreSQL...
 echo Source: %SOURCE%
@@ -43,7 +44,7 @@ echo.
 echo PostGIS installation complete!
 echo.
 echo Next steps:
-echo   1. Run: "D:\pgsql\bin\psql.exe" -U postgres -h localhost -d roadmap -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-echo   2. Run: "D:\pgsql\bin\psql.exe" -U postgres -h localhost -d roadmap -f "D:\code\IdeaFiles\RoadMap\sql\init.sql"
+echo   1. Run: "%TARGET%\bin\psql.exe" -U postgres -h localhost -d roadmap -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+echo   2. Run: "%TARGET%\bin\psql.exe" -U postgres -h localhost -d roadmap -f "%SCRIPT_DIR%..\sql\init.sql"
 echo.
 pause

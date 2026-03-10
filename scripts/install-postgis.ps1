@@ -1,8 +1,10 @@
 # PostGIS Installation Script - Copy DLLs to PostgreSQL directory
 # Must be run as Administrator
 
-$source = "D:\code\IdeaFiles\RoadMap\postgis-tmp\postgis-bundle-pg18-3.6.1x64"
-$target = "D:\pgsql"
+$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$source = Join-Path $scriptRoot "..\postgis-tmp\postgis-bundle-pg18-3.6.1x64" | Resolve-Path -ErrorAction SilentlyContinue | ForEach-Object { $_.Path }
+# Default target (PostgreSQL installation). You can override by setting the TARGET environment variable before running.
+if ($env:TARGET) { $target = $env:TARGET } else { $target = "D:\pgsql" }
 
 Write-Host "Copying PostGIS bin DLLs..."
 Copy-Item -Path "$source\bin\*.dll" -Destination "$target\bin\" -Force -ErrorAction Stop
