@@ -146,3 +146,27 @@ CREATE INDEX IF NOT EXISTS idx_check_ins_user_time ON check_ins (user_id, checke
 -- =====================================================
 -- 瀹屾垚
 -- =====================================================
+
+-- =====================================================
+-- 8. 设施基础表（兼容设施管理）
+-- =====================================================
+CREATE TABLE IF NOT EXISTS facilities (
+    id              BIGSERIAL PRIMARY KEY,
+    mc              VARCHAR(255) NOT NULL,
+    typeid          VARCHAR(32) NOT NULL,
+    admin_area_name VARCHAR(128),
+    szwz            VARCHAR(255),
+    gldw            VARCHAR(64),
+    gldwname        VARCHAR(255),
+    yhdw            VARCHAR(64),
+    yhdwname        VARCHAR(255),
+    zt              VARCHAR(32),
+    radius_meters   DOUBLE PRECISION DEFAULT 100,
+    geom            GEOMETRY(POINT, 4326) NOT NULL,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_facilities_geom ON facilities USING GIST (geom);
+CREATE INDEX IF NOT EXISTS idx_facilities_typeid ON facilities (typeid);
+CREATE INDEX IF NOT EXISTS idx_facilities_admin_area ON facilities (admin_area_name);
