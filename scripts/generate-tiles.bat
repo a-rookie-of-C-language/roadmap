@@ -1,78 +1,117 @@
 @echo off
+setlocal EnableExtensions
+
 REM =====================================================
-REM  Planetiler - 从 OSM PBF 生成矢量瓦片 (.mbtiles)
-REM  使用方式: 双击运行或在命令行执行
-REM  前置条件: 安装 Java 17+
+REM  RoadMap - generate vector tiles with Planetiler
+REM  Requirements:
+REM    - Java 17+
+REM    - A real .osm.pbf file at project root
 REM =====================================================
 
-setlocal
+set "SCRIPT_DIR=%~dp0"
+set "PROJECT_DIR=%SCRIPT_DIR%.."
+set "PBF_FILE=%PROJECT_DIR%\china-260226.osm.pbf"
+set "OUTPUT_DIR=%PROJECT_DIR%\data"
+set "OUTPUT_FILE=%OUTPUT_DIR%\china.mbtiles"
+set "PLANETILER_JAR=%SCRIPT_DIR%planetiler.jar"
+set "PLANETILER_VERSION=0.7.0"
+set "DOWNLOAD_URL=https://github.com/onthegomap/planetiler/releases/download/v%PLANETILER_VERSION%/planetiler.jar"
 
-set SCRIPT_DIR=%~dp0
-set PROJECT_DIR=%SCRIPT_DIR%..
-set PBF_FILE=%PROJECT_DIR%\china-260226.osm.pbf
-set OUTPUT_DIR=%PROJECT_DIR%\data
-set OUTPUT_FILE=%OUTPUT_DIR%\china.mbtiles
-set PLANETILER_JAR=%SCRIPT_DIR%\planetiler.jar
-set PLANETILER_VERSION=0.8.2
-set DOWNLOAD_URL=https://github.com/onthegomap/planetiler/releases/download/v%PLANETILER_VERSION%/planetiler-openmaptiles-%PLANETILER_VERSION%-with-deps.jar
+REM Optional proxy for Planetiler downloads.
+REM Example in PowerShell before running this script:
+REM   $env:TILE_PROXY_HOST="127.0.0.1"
+REM   $env:TILE_PROXY_PORT="7890"
+if defined TILE_PROXY_HOST if defined TILE_PROXY_PORT (
+    set "JAVA_TOOL_OPTIONS=-Dhttp.proxyHost=%TILE_PROXY_HOST% -Dhttp.proxyPort=%TILE_PROXY_PORT% -Dhttps.proxyHost=%TILE_PROXY_HOST% -Dhttps.proxyPort=%TILE_PROXY_PORT%"
+    set "HTTP_PROXY=http://%TILE_PROXY_HOST%:%TILE_PROXY_PORT%"
+    set "HTTPS_PROXY=http://%TILE_PROXY_HOST%:%TILE_PROXY_PORT%"
+    echo [INFO] Using proxy: %TILE_PROXY_HOST%:%TILE_PROXY_PORT%
+)
 
 echo =====================================================
-echo  RoadMap - 瓦片生成工具
+echo  RoadMap - Tile Generator
 echo =====================================================
 echo.
 
-REM 检查 PBF 文件
 if not exist "%PBF_FILE%" (
-    echo [错误] 未找到 PBF 文件: %PBF_FILE%
-    echo 请将 .osm.pbf 文件放在项目根目录
-    pause
+    echo [ERROR] PBF file not found:
+    echo         "%PBF_FILE%"
+    echo.
+    echo Put a real .osm.pbf file in the project root, or run:
+    echo   git lfs pull
     exit /b 1
 )
 
-REM 创建输出目录
-if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
-
-REM 下载 Planetiler (如果不存在)
-if not exist "%PLANETILER_JAR%" (
-    echo [信息] 下载 Planetiler v%PLANETILER_VERSION% ...
-    echo [信息] URL: %DOWNLOAD_URL%
-    powershell -Command "Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%PLANETILER_JAR%'"
-    if errorlevel 1 (
-        echo [错误] 下载失败，请手动下载:
-        echo %DOWNLOAD_URL%
-        echo 放置到: %PLANETILER_JAR%
-        pause
+for %%A in ("%PBF_FILE%") do (
+    if %%~zA LSS 1048576 (
+        echo [ERROR] The PBF file is too small: %%~zA bytes
+        echo.
+        echo This is probably a Git LFS pointer, not the real map data.
+        echo Run:
+        echo   git lfs install
+        echo   git lfs pull
+        echo.
+        echo Or replace "%PBF_FILE%" with a real .osm.pbf file.
         exit /b 1
     )
-    echo [信息] 下载完成
+)
+
+if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
+
+if not exist "%PLANETILER_JAR%" (
+    echo [INFO] Downloading Planetiler v%PLANETILER_VERSION% ...
+    echo [INFO] %DOWNLOAD_URL%
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%PLANETILER_JAR%'"
+    if errorlevel 1 (
+        echo [WARN] PowerShell download failed, trying curl.exe ...
+        curl.exe -L --retry 3 --output "%PLANETILER_JAR%" "%DOWNLOAD_URL%"
+    )
+    if errorlevel 1 (
+        echo [ERROR] Failed to download Planetiler.
+        echo Download it manually and save it as:
+        echo   "%PLANETILER_JAR%"
+        exit /b 1
+    )
+)
+
+for %%A in ("%PLANETILER_JAR%") do (
+    if %%~zA LSS 1048576 (
+        echo [ERROR] Planetiler jar is invalid: %%~zA bytes
+        echo.
+        echo Delete this file and run the script again:
+        echo   "%PLANETILER_JAR%"
+        echo.
+        echo Or download it manually:
+        echo   %DOWNLOAD_URL%
+        exit /b 1
+    )
 )
 
 echo.
-echo [信息] 开始生成瓦片...
-echo [信息] 输入: %PBF_FILE%
-echo [信息] 输出: %OUTPUT_FILE%
-echo [信息] 预计时间: 15-40分钟 (取决于机器配置)
+echo [INFO] Generating tiles...
+echo [INFO] Input : "%PBF_FILE%"
+echo [INFO] Output: "%OUTPUT_FILE%"
+echo [INFO] This may take 15-40 minutes depending on your machine.
 echo.
 
 java -Xmx4g -jar "%PLANETILER_JAR%" ^
+    --download ^
     --osm_path="%PBF_FILE%" ^
     --output="%OUTPUT_FILE%" ^
-    --nodemap_type=sparsebitset ^
     --force
 
 if errorlevel 1 (
     echo.
-    echo [错误] 瓦片生成失败!
-    pause
+    echo [ERROR] Tile generation failed.
     exit /b 1
 )
 
 echo.
 echo =====================================================
-echo [完成] 瓦片文件已生成: %OUTPUT_FILE%
-for %%A in ("%OUTPUT_FILE%") do echo [信息] 文件大小: %%~zA bytes
+echo [DONE] Generated:
+echo        "%OUTPUT_FILE%"
+for %%A in ("%OUTPUT_FILE%") do echo [INFO] Size: %%~zA bytes
 echo.
-echo 下一步: 使用 TileServer-GL 启动瓦片服务
-echo   npx tileserver-gl --mbtiles data\china.mbtiles --port 8080
+echo Next step:
+echo   scripts\start-tileserver.bat
 echo =====================================================
-pause

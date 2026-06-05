@@ -2,3 +2,6 @@
 *.log
 *.tmp
 target/
+data/
+scripts/planetiler.jar
+*.mbtiles
