@@ -105,9 +105,13 @@ bash scripts/generate-tiles.sh
 scripts\start-tileserver.bat
 ```
 
-TileServer-GL 启动后在 http://localhost:8080 提供瓦片服务。
+TileServer-GL 启动后在 http://localhost:8890 提供瓦片服务，默认样式地址为：
 
-> Demo 页面默认使用 OpenFreeMap 公共瓦片。生产环境请在 `app.js` 中将 `tileStyle` 改为自部署的 TileServer-GL 地址。
+```text
+http://localhost:8890/styles/roadmap-basic/style.json
+```
+
+> Demo 页面默认使用上述自部署 TileServer-GL 样式。如需独立服务器部署，请在 `app.js` 中将 `tileStyle` 改为服务器上的样式地址。
 
 ## API 接口
 

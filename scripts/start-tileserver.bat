@@ -10,7 +10,8 @@ REM =====================================================
 
 set "PROJECT_DIR=%~dp0.."
 set "MBTILES=%PROJECT_DIR%\data\china.mbtiles"
-set "PORT=8080"
+set "CONFIG=%PROJECT_DIR%\tileserver\config.json"
+set "PORT=8890"
 
 echo =====================================================
 echo  RoadMap - TileServer-GL
@@ -26,10 +27,18 @@ if not exist "%MBTILES%" (
     exit /b 1
 )
 
+if not exist "%CONFIG%" (
+    echo [ERROR] TileServer config not found:
+    echo         "%CONFIG%"
+    exit /b 1
+)
+
 echo [INFO] Starting TileServer-GL...
 echo [INFO] MBTiles: "%MBTILES%"
+echo [INFO] Config : "%CONFIG%"
 echo [INFO] Port   : %PORT%
 echo [INFO] URL    : http://localhost:%PORT%
+echo [INFO] Style  : http://localhost:%PORT%/styles/roadmap-basic/style.json
 echo.
 
-npx tileserver-gl --mbtiles "%MBTILES%" --port %PORT% --verbose
+npx tileserver-gl --config "%CONFIG%" --port %PORT% --verbose
