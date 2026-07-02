@@ -1,0 +1,27 @@
+{
+  "name": "roadmap",
+  "version": "1.0.0",
+  "description": "替代百度地图的自部署 GPS 定位追踪系统。基于 OpenStreetMap 数据，支持定位上报、轨迹生成、实时推送和轨迹回放。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-rookie-of-C-language/roadmap.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/a-rookie-of-C-language/roadmap/issues"
+  },
+  "homepage": "https://github.com/a-rookie-of-C-language/roadmap#readme",
+  "dependencies": {
+    "tileserver-gl": "^5.6.0"
+  }
+}

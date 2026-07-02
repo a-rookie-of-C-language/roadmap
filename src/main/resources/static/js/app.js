@@ -10,7 +10,7 @@ const CONFIG = {
   wsBase: detectWsBase(),
   defaultCenter: [116.397, 39.908], // 北京
   defaultZoom: 12,
-  tileStyle: 'http://localhost:8890/styles/roadmap-basic/style.json',
+  tileStyle: '/map-tiles/styles/roadmap-basic/style.json',
   reconnectInterval: 3000,
   // 轨迹整体偏移：左下角（西南方向）45° 移动 300m
   // trajectoryOffsetDistance: 1000, // 偏移距离（米）
