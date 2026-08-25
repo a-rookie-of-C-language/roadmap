@@ -1,0 +1,11 @@
+.git
+.github
+.vscode
+target
+data
+china-*.osm.pbf
+*.mbtiles
+*.log
+*.tmp
+node_modules
+**/.DS_Store

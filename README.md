@@ -74,11 +74,11 @@ psql -U postgres -d roadmap -f sql/init.sql
 mvn spring-boot:run
 ```
 
-后端启动后访问: http://localhost:8090
+后端启动后访问: http://localhost:8010
 
 ### 4. 访问 Demo 页面
 
-浏览器打开 http://localhost:8090/index.html
+浏览器打开 http://localhost:8010/index.html
 
 Demo 页面功能：
 - 生成模拟轨迹数据
@@ -167,7 +167,22 @@ POST /api/v1/locations/single
 
 ### WebSocket 实时推送
 
-连接 `ws://localhost:8090/ws/location`，发送 `{"userId": 1}` 订阅用户位置更新。
+连接 `ws://localhost:8010/ws/location`，发送 `{"userId": 1}` 订阅用户位置更新。
+
+## Docker 部署
+
+项目提供了完整的 Docker Compose 部署，包括 RoadMap、PostGIS 和 TileServer-GL：
+
+```bash
+docker compose up -d --build
+```
+
+启动后访问：
+
+- RoadMap: http://localhost:8010
+- TileServer-GL: http://localhost:8890
+
+首次启动时会自动执行 `sql/init.sql`。数据库数据保存于 Docker volume `roadmap_postgres-data`；如需修改默认数据库密码，可在项目根目录创建 `.env`，设置 `POSTGRES_PASSWORD`。现有 `data/china.mbtiles` 通过只读挂载提供给瓦片服务，不会打进应用镜像。
 
 ## 小程序对接
 

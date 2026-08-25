@@ -1,0 +1,14 @@
+# syntax=docker/dockerfile:1
+
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+RUN npm install --global --no-fund --no-audit tileserver-gl-light@4
+
+COPY tileserver /app/tileserver
+RUN useradd --system --create-home --uid 10001 tileserver \
+    && chown -R tileserver:tileserver /app
+
+USER tileserver
+EXPOSE 8890
+ENTRYPOINT ["tileserver-gl-light", "--config", "/app/tileserver/config.json", "--port", "8890", "--verbose"]
